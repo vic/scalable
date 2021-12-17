@@ -1,0 +1,3 @@
+package scalable
+
+object Other {}
