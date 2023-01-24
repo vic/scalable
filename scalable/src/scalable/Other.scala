@@ -1,3 +1,0 @@
-package scalable
-
-object Other {}

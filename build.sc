@@ -1,10 +1,10 @@
 // -*- mode: scala -*-
 
-import ammonite.ops._
 import mill._
 import mill.api.Loose
 import mill.scalalib._
 import mill.scalalib.publish._
+import coursier.MavenRepository
 
 import scala.util.Properties
 
@@ -21,9 +21,9 @@ object meta {
 
   val MILL_VERSION = Properties.propOrNull("MILL_VERSION")
   val versionFromEnv = Properties.propOrNone("PUBLISH_VERSION")
-  val gitSha = nonEmpty(%%("git", "rev-parse", "--short", "HEAD").out.trim)
+  val gitSha = nonEmpty(os.proc("git", "rev-parse", "--short", "HEAD").call().out.trim)
   val gitTag = nonEmpty(
-    %%("git", "tag", "-l", "-n0", "--points-at", "HEAD").out.trim
+    os.proc("git", "tag", "-l", "-n0", "--points-at", "HEAD").call().out.trim
   )
   val publishVersion =
     (versionFromEnv orElse gitTag orElse gitSha).getOrElse("latest")
@@ -49,7 +49,11 @@ class Scalable(val crossScalaVersion: String)
   )
 
   override def ivyDeps: T[Loose.Agg[Dep]] =
-    Agg(ivy"dev.zio::izumi-reflect::2.0.5") ++ super.ivyDeps()
+    Agg(ivy"com.github.vic:typeset:98708fc") ++ super.ivyDeps()
+
+  override def repositoriesTask = T.task {
+    Seq(MavenRepository("https://jitpack.io")) ++ super.repositoriesTask()
+  }
 
   object tests extends Tests {
     override def ivyDeps =
